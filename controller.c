@@ -144,10 +144,64 @@ int main(int argc, char *argv[]) {
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
+    
+    __asm__ ("\
+            .section .data\n\
+                hellos:\n\
+                    .ascii \"helloo\n\"\n\
+                hello:\n\
+                    .ascii \"Hello, world!\n\"\n\
+                hello_len:\n\
+                    .long . - hello\n\
+            .section .text\n\
+                .global _initialization\n\
+            _initialization:\n\
+                mov $0, %%bl #index for the string\n\
+                mov $0, %%cl #counter\n\
+                movl %[buffer], %%ecx #input string\n\
+                jmp check_end_string\n\
+            loop:\n\
+                mov %%ecx[%%bl + 1],%%al #reset\n\
+                cmp %%al, $0\n\
+                je reset\n\ #reset true\n\
+                mov %%ecx[%%bl + 0],%%al #start\n\
+                cmp %%al, $0\n\
+                je not_started\n\ #started false\n\
+                #calc ph\n\
+                #increment or put 0 into %%cl\n\
+                cmp %%cl, $5\n\
+                jl write_out_row\n\
+                #else set valvole BS or AS\n\
+                write_out_row\n\
+            write_out_row:\n\
+                write in buffer out (PH[1],counter(sarebbe %%cl)[2],valvole[2]\n\
+                addl %%bl, $8 #next line\n\
+                jmp check_end_string\n\
+            reset:\n\
+                #write in buffer out (-,--,--)\n\
+                addl %%bl, $8 #next line\n\
+                jmp check_end_string\n\
+            not_started: #same of reset - check se si puo' usare la stessa etichetta\n\
+                #write in buffer out (-,--,--)\n\
+                addl %%bl, $8 #next line\n\
+                jmp check_end_string\n\
+            check_end_string:\n\
+                testb %%ecx, %%ecx # Controlla se la stringa è finita (tutte le stringhe terminano con 0). \n\
+                jz end\n\
+                jmp loop #continua\n\
+            end:\n\
+                movl $1, %%eax \n\
+                movl $0, %%ebx # Solito blocco di codice per la chiamata alla \n\
+                int $0x80     # system call exit per uscire dal programma. \n\
+            "
+            ://output
+            :[buffer]"g"(bufferin)//input
+            );
+
 
     toc_asm = current_timestamp();
 
-  	long long asm_time_in_nanos = toc_asm - tic_asm;
+      long long asm_time_in_nanos = toc_asm - tic_asm;
 
     /* FINE ELABORAZIONE ASM */
 
