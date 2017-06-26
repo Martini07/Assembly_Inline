@@ -7,7 +7,7 @@
 #include <sys/time.h>
 
 /* Inserite eventuali extern modules qui */
-
+void inlineasm(char *o, char *i);
 /* ************************************* */
 
 enum { MAXLINES = 400 };
@@ -140,65 +140,14 @@ int main(int argc, char *argv[]) {
     /* INIZIO ELABORAZIONE ASM */
 
     tic_asm = current_timestamp();
-
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
-    
-    __asm__ ("\
-            .section .data\n\
-                hellos:\n\
-                    .ascii \"helloo\n\"\n\
-                hello:\n\
-                    .ascii \"Hello, world!\n\"\n\
-                hello_len:\n\
-                    .long . - hello\n\
-            .section .text\n\
-                .global _initialization\n\
-            _initialization:\n\
-                mov $0, %%bl #index for the string\n\
-                mov $0, %%cl #counter\n\
-                movl %[buffer], %%ecx #input string\n\
-                jmp check_end_string\n\
-            loop:\n\
-                mov %%ecx[%%bl + 1],%%al #reset\n\
-                cmp %%al, $0\n\
-                je reset\n\ #reset true\n\
-                mov %%ecx[%%bl + 0],%%al #start\n\
-                cmp %%al, $0\n\
-                je not_started\n\ #started false\n\
-                #calc ph\n\
-                #increment or put 0 into %%cl\n\
-                cmp %%cl, $5\n\
-                jl write_out_row\n\
-                #else set valvole BS or AS\n\
-                write_out_row\n\
-            write_out_row:\n\
-                write in buffer out (PH[1],counter(sarebbe %%cl)[2],valvole[2]\n\
-                addl %%bl, $8 #next line\n\
-                jmp check_end_string\n\
-            reset:\n\
-                #write in buffer out (-,--,--)\n\
-                addl %%bl, $8 #next line\n\
-                jmp check_end_string\n\
-            not_started: #same of reset - check se si puo' usare la stessa etichetta\n\
-                #write in buffer out (-,--,--)\n\
-                addl %%bl, $8 #next line\n\
-                jmp check_end_string\n\
-            check_end_string:\n\
-                testb %%ecx, %%ecx # Controlla se la stringa è finita (tutte le stringhe terminano con 0). \n\
-                jz end\n\
-                jmp loop #continua\n\
-            end:\n\
-                movl $1, %%eax \n\
-                movl $0, %%ebx # Solito blocco di codice per la chiamata alla \n\
-                int $0x80     # system call exit per uscire dal programma. \n\
-            "
-            ://output
-            :[buffer]"g"(bufferin)//input
-            );
-
-
+	/**
+    __asm__(
+            "movl %eax,%ecx\n\t"
+    );*/
+    inlineasm(bufferout_asm,bufferin);
     toc_asm = current_timestamp();
 
       long long asm_time_in_nanos = toc_asm - tic_asm;
@@ -217,3 +166,191 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+void inlineasm(char *o, char *i) {
+    asm (
+            "loop:\n\t"
+                "lodsb\n\t" //leggo primo carattere (start)
+				"cmp $0, %%al\n\t"
+				"je end_loop\n\t"
+                "cmp $48, %%al\n\t" //codice ascii 0: 48 vederese convienedecrementare 48
+                "je off\n\t" //se continua init a 1
+				"movb $83,%%al\n\t" //metto S indicare dispositivo started
+				"stosb\n\t"
+				"lodsb\n\t" //leggo primo ; vedere come modificare esi per evitare di leggere
+				"stosb\n\t"
+				"lodsb\n\t" //leggo reset
+				"cmp $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
+				"je reset\n\t" //se continua init a 1 e reset a 0
+				"movb $78, %%al\n\t" //metto N per indicare non reset
+				"stosb\n\t"
+				"lodsb\n\t" //leggo secondo ,
+                "stosb\n\t" //scrivo secondo .
+				"lodsb\n\t" //leggo prima cifra ph
+				"cmp $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevedibile
+				"je basic\n\t"
+				"lodsb\n\t" //leggo seconda cifra ph (sapendo che la prima è "0" (!=1))
+				"cmp $54, %%al\n\t" //confronto col 6 
+				"jl acid\n\t"
+				"cmp $56, %%al\n\t" //confonto col 8
+				"jg basic\n\t"
+				"je verify_81\n\t"
+				"neutro:\n\t"
+				"movb $78,%%al\n\t" //so che è neutro scrivo N
+				"stosb\n\t"
+				"movb $69,%%al\n\t" //so che è neutro scrivo E
+				"stosb\n\t"
+				"movb $85,%%al\n\t" //so che è neutro scrivo U
+				"stosb\n\t"
+				"lodsb\n\t" //leggo terzo valore ph
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"acid:\n\t"
+				"movb $65, %%al\n\t" //scrivo A di acido
+				"stosb\n\t"
+				"movb $67, %%al\n\t" //scrivo C di acido
+				"stosb\n\t"
+				"movb $73, %%al\n\t" //scrivo I di acido
+				"stosb\n\t"
+				"lodsb\n\t" //leggo terza cifra ph
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"basic:\n\t"
+				"movb $66, %%al\n\t" //scrivo B di acido
+				"stosb\n\t"
+				"movb $65, %%al\n\t" //scrivo A di acido
+				"stosb\n\t"
+				"movb $83, %%al\n\t" //scrivo S di acido
+				"stosb\n\t"
+				"lodsb\n\t" //leggo terza cifra ph
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"verify_81:\n\t"
+				"lodsb\n\t" //leggo terza cifra
+				"cmp $48, %%al\n\t" //confronto con 0
+				"je neutro2\n\t"
+				"jmp basic2\n\t"
+			"basic2:\n\t"
+				"movb $66, %%al\n\t" //scrivo B di acido
+				"stosb\n\t"
+				"movb $65, %%al\n\t" //scrivo A di acido
+				"stosb\n\t"
+				"movb $83, %%al\n\t" //scrivo S di acido
+				"stosb\n\t"
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"neutro2:\n\t"
+				"movb $78,%%al\n\t" //so che è neutro scrivo N
+				"stosb\n\t"
+				"movb $69,%%al\n\t" //so che è neutro scrivo E
+				"stosb\n\t"
+				"movb $85,%%al\n\t" //so che è neutro scrivo U
+				"stosb\n\t"
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+            "end_loop:\n\t"
+		        "movb $0, (%%rdi)\n\t" //insert end string character
+		        "movq -0x8(%%rbp), %%rdi\n\t" //restore pointer
+				"jmp end\n\t"
+			"off:\n\t"
+				"movb $45, %%al\n\t" //scrivo - indico stato indifferente ( dispositivo spento)
+				"stosb\n\t" 
+				"lodsb\n\t" //leggo primo ; vedere come modificare esi per evitare di leggere
+				"stosb\n\t"
+				"lodsb\n\t" //leggo reset
+				"movb $45, %%al\n\t" //scrivo - indico numero cicli clock indifferente
+				"stosb\n\t"
+				"stosb\n\t"
+				"lodsb\n\t" //leggo secondo ,
+                "stosb\n\t" //scrivo secondo ,
+				"lodsb\n\t" //leggo primo valore ph
+				"movb $45, %%al\n\t" //sostituisco con -
+				"stosb\n\t"
+				"stosb\n\t"
+				"lodsb\n\t" //leggo secondo valore ph
+				"lodsb\n\t" //leggo terzo valore ph
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"reset:\n\t"
+				"movb $45, %%al\n\t" //scrivo - indico macchina in reset
+				"stosb\n\t"
+				"stosb\n\t"
+				"lodsb\n\t" //leggo secondo ,
+                "stosb\n\t" //scrivo secondo ,
+				"lodsb\n\t" //leggo primo valore ph
+				"movb $45, %%al\n\t" //sostituisco con -
+				"stosb\n\t"
+				"stosb\n\t"
+				"lodsb\n\t" //leggo secondo valore ph
+				"lodsb\n\t" //leggo terzo valore ph
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"end:\n\t"
+            :"=D" (o)
+            :"S" (i)
+    );
+    return;
+}
+/**
+ asm (
+            "loop:\n\t"
+                "lodsb\n\t" //leggo primo carattere (start)
+                "cmp $48, %%al\n\t" //codice ascii 0: 48 vederese convienedecrementare 48
+				"cmp $0, %%al\n\t"
+				"je end_loop\n\t"
+                "je reset\n\t" //se continua init a 1
+				"lodsb\n\t" //leggo primo ; vedere come modificare esi per evitare di leggere
+				"lodsb\n\t" //leggo reset
+				"cmp $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
+				"je reset\n\t" //se continua init a 1 e reset a 0
+				"lodsb\n\t" //leggo secondo ,
+				"mov $79, %%al\n\t" //scrivo O indico macchina accesa
+                "stosb\n\t"
+				"mov $44, %%al\n\t" //scrivo ;
+                "stosb\n\t"
+				"mov $48, %%al\n\t" //metto 0 nck
+                "stosb\n\t"
+				"mov $44, %%al\n\t" //scrivo ;
+                "stosb\n\t"
+				"lodsb\n\t" //copio primo valore ph
+				"stosb\n\t"
+				"lodsb\n\t" //copio secondo valore ph
+				"stosb\n\t"
+				"lodsb\n\t" //copio terzo valore ph
+				"stosb\n\t"
+				"lodsb\n\t" //scrivo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+            "end_loop:\n\t"
+            "movb $0, (%%rdi)\n\t" //insert end string character
+            "movq -0x8(%%rbp), %%rdi\n\t" //restore pointer
+			"reset:\n\t"
+				"mov $45, %%al\n\t" //metto - in prima riga
+				"stosb\n\t"
+				"mov $44, %%al\n\t" //scrivo ;
+                "stosb\n\t"
+				"mov $45, %%al\n\t" //metto - in prima riga
+				"stosb\n\t"
+				"stosb\n\t"
+				"mov $44, %%al\n\t" //scrivo ;
+                "stosb\n\t"
+				"lodsb\n\t"
+				"lodsb\n\t"
+				"lodsb\n\t"
+				"mov $45, %%al\n\t" //metto - in prima riga
+				"stosb\n\t"
+				"stosb\n\t"
+				"stosb\n\t"
+				"lodsb\n\t"
+				"stosb\n\t"
+				"jmp loop\n\t"
+            :"=D" (o)
+            :"S" (i)
+    );
+**/
