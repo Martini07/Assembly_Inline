@@ -168,126 +168,180 @@ int main(int argc, char *argv[]) {
 }
 void inlineasm(char *o, char *i) {
     asm (
-            "loop:\n\t"
+            "xorb %%cl, %%cl\n\t" //contatore dei cicli di clocl
+			"xorb %%dl, %%dl\n\t" //stato soluzione
+			"loop:\n\t"
                 "lodsb\n\t" //leggo primo carattere (start)
-				"cmp $0, %%al\n\t"
+				"cmpb $0, %%al\n\t"
 				"je end_loop\n\t"
-                "cmp $48, %%al\n\t" //codice ascii 0: 48 vederese convienedecrementare 48
+                "cmpb $48, %%al\n\t" //codice ascii 0: 48 vedere se conviene decrementare 48
                 "je off\n\t" //se continua init a 1
-				"movb $83,%%al\n\t" //metto S indicare dispositivo started
-				"stosb\n\t"
-				"lodsb\n\t" //leggo primo ; vedere come modificare esi per evitare di leggere
-				"stosb\n\t"
+				"#lodsb\n\t" //leggo primo , vedere come modificare esi per evitare di leggere
+				"inc %%rsi\n\t"
 				"lodsb\n\t" //leggo reset
-				"cmp $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
+				"cmpb $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
 				"je reset\n\t" //se continua init a 1 e reset a 0
-				"movb $78, %%al\n\t" //metto N per indicare non reset
-				"stosb\n\t"
-				"lodsb\n\t" //leggo secondo ,
-                "stosb\n\t" //scrivo secondo .
+				"inc %%rsi\n\t"
 				"lodsb\n\t" //leggo prima cifra ph
-				"cmp $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevedibile
+				"cmpb $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevedibile
 				"je basic\n\t"
 				"lodsb\n\t" //leggo seconda cifra ph (sapendo che la prima è "0" (!=1))
-				"cmp $54, %%al\n\t" //confronto col 6 
+				"cmpb $54, %%al\n\t" //confronto col 6 
 				"jl acid\n\t"
-				"cmp $56, %%al\n\t" //confonto col 8
+				"cmpb $56, %%al\n\t" //confonto col 8
 				"jg basic\n\t"
 				"je verify_81\n\t"
 				"neutro:\n\t"
+				"cmpb $4, %%dl\n\t" //prima era neutro
+				"je al_neutro\n\t"
+				"movb $4, %%dl\n\t" //prima non era neutro aggiorno stato soluzione
+				"xorb %%cl, %%cl\n\t" //azzero il contatore di cicli
 				"movb $78,%%al\n\t" //so che è neutro scrivo N
 				"stosb\n\t"
-				"movb $69,%%al\n\t" //so che è neutro scrivo E
+				"movb $44,%%al\n\t" //metto ,
 				"stosb\n\t"
-				"movb $85,%%al\n\t" //so che è neutro scrivo U
+				"inc %%rsi\n\t" //leggo terzo valore ph
+				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola (soluzione già neutra)
 				"stosb\n\t"
-				"lodsb\n\t" //leggo terzo valore ph
+				"stosb\n\t"
+				"lodsb\n\t" //leggo carriage return o conviene metterlo diretto e inc rsi?
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"al_neutro:\n\t"
+				"incb %%cl\n\t" //incremento contatore cicli di clock
+				"movb $78,%%al\n\t" //so che è neutro scrivo N
+				"stosb\n\t"
+				"movb $44,%%al\n\t" //metto ,
+				"stosb\n\t"
+				"inc %%rsi\n\t" //leggo terzo valore ph
+				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola (soluzione già neutra)
+				"stosb\n\t"
+				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"acid:\n\t"
+				"cmpb $1, %%dl\n\t" //confronto se prima era acido
+				"je al_acid\n\t" //guardare se meglio vedere subito se sono passati i cinque (sei) cicli
+				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock prima non era acido
+				"movb $1, %%dl\n\t" //imposto stato soluzione attuale acido
 				"movb $65, %%al\n\t" //scrivo A di acido
 				"stosb\n\t"
-				"movb $67, %%al\n\t" //scrivo C di acido
+				"movb $44,%%al\n\t" //metto ,
 				"stosb\n\t"
-				"movb $73, %%al\n\t" //scrivo I di acido
+				"inc %%rsi\n\t" //leggo terza cifra ph
+				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
 				"stosb\n\t"
-				"lodsb\n\t" //leggo terza cifra ph
+				"stosb\n\t"
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"al_acid:\n\t"
+				"incb %%cl\n\t" //incremento contatore cicli di clock
+				"movb $65, %%al\n\t" //scrivo A di acido
+				"stosb\n\t"
+				"movb $44,%%al\n\t" //metto ,
+				"stosb\n\t"
+				"inc %%rsi\n\t" //leggo terza cifra ph
+				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
+				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
+				"movb $66, %%al\n\t" //scrivo B
+				"stosb\n\t"
+				"movb $83, %%al\n\t" //scrivo S
+				"stosb\n\t"
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"notopen:\n\t"
+				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
+				"stosb\n\t"
+				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"basic:\n\t"
-				"movb $66, %%al\n\t" //scrivo B di acido
+				"cmpb $2, %%dl\n\t" //confronto se prima era basico
+				"je al_basic\n\t" //guardare se meglio vedere subito se sono passati i cinque (sei) cicli
+				"#\n\t" //prima non era basico
+				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock
+				"movb $2, %%dl\n\t" //imposto stato soluzione attuale basico
+				"movb $66, %%al\n\t" //scrivo B di basico
 				"stosb\n\t"
-				"movb $65, %%al\n\t" //scrivo A di acido
+				"movb $44,%%al\n\t" //metto ,
 				"stosb\n\t"
-				"movb $83, %%al\n\t" //scrivo S di acido
+				"inc %%rsi\n\t" //leggo terza cifra ph
+				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
 				"stosb\n\t"
-				"lodsb\n\t" //leggo terza cifra ph
+				"stosb\n\t"
+				"lodsb\n\t" //leggo carriage return
+				"stosb\n\t"
+                "jmp loop\n\t"
+			"al_basic:\n\t"
+				"incb %%cl\n\t" //incremento contatore cicli di clock
+				"movb $66, %%al\n\t" //scrivo B di basico
+				"stosb\n\t"
+				"movb $44,%%al\n\t" //metto ,
+				"stosb\n\t"
+				"inc %%rsi\n\t" //leggo terza cifra ph
+				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
+				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
+				"movb $65, %%al\n\t" //scrivo A
+				"stosb\n\t"
+				"movb $83, %%al\n\t" //scrivo S
+				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"verify_81:\n\t"
 				"lodsb\n\t" //leggo terza cifra
-				"cmp $48, %%al\n\t" //confronto con 0
-				"je neutro2\n\t"
-				"jmp basic2\n\t"
-			"basic2:\n\t"
-				"movb $66, %%al\n\t" //scrivo B di acido
-				"stosb\n\t"
-				"movb $65, %%al\n\t" //scrivo A di acido
-				"stosb\n\t"
-				"movb $83, %%al\n\t" //scrivo S di acido
-				"stosb\n\t"
-				"lodsb\n\t" //leggo carriage return
-				"stosb\n\t"
-                "jmp loop\n\t"
-			"neutro2:\n\t"
-				"movb $78,%%al\n\t" //so che è neutro scrivo N
-				"stosb\n\t"
-				"movb $69,%%al\n\t" //so che è neutro scrivo E
-				"stosb\n\t"
-				"movb $85,%%al\n\t" //so che è neutro scrivo U
-				"stosb\n\t"
-				"lodsb\n\t" //leggo carriage return
-				"stosb\n\t"
-                "jmp loop\n\t"
+				"cmpb $48, %%al\n\t" //confronto con 0
+				"dec %%rsi\n\t" //torno indietro per poter usare neutro e basic
+				"je neutro\n\t"
+				"jmp basic\n\t"
             "end_loop:\n\t"
 		        "movb $0, (%%rdi)\n\t" //insert end string character
 		        "movq -0x8(%%rbp), %%rdi\n\t" //restore pointer
 				"jmp end\n\t"
 			"off:\n\t"
+				"xorb %%cl, %%cl\n\t" //azzero contatore
+				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico stato indifferente ( dispositivo spento)
 				"stosb\n\t" 
-				"lodsb\n\t" //leggo primo ; vedere come modificare esi per evitare di leggere
+				"lodsb\n\t" //leggo primo , vedere come modificare esi per evitare di leggere
 				"stosb\n\t"
-				"lodsb\n\t" //leggo reset
+				"inc %%rsi\n\t" //leggo reset
 				"movb $45, %%al\n\t" //scrivo - indico numero cicli clock indifferente
 				"stosb\n\t"
 				"stosb\n\t"
 				"lodsb\n\t" //leggo secondo ,
                 "stosb\n\t" //scrivo secondo ,
-				"lodsb\n\t" //leggo primo valore ph
-				"movb $45, %%al\n\t" //sostituisco con -
+				"inc %%rsi\n\t" //leggo primo valore ph
+				"movb $45, %%al\n\t" //sostituisco con - chiudo valvole
 				"stosb\n\t"
 				"stosb\n\t"
-				"lodsb\n\t" //leggo secondo valore ph
-				"lodsb\n\t" //leggo terzo valore ph
+				"inc %%rsi\n\t" //leggo secondo valore ph
+				"inc %%rsi\n\t" //leggo terzo valore ph
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"reset:\n\t"
+				"xorb %%cl, %%cl\n\t" //azzero contatore
+				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico macchina in reset
-				"stosb\n\t"
 				"stosb\n\t"
 				"lodsb\n\t" //leggo secondo ,
                 "stosb\n\t" //scrivo secondo ,
-				"lodsb\n\t" //leggo primo valore ph
+				"inc %%rsi\n\t" //leggo primo valore ph
 				"movb $45, %%al\n\t" //sostituisco con -
 				"stosb\n\t"
 				"stosb\n\t"
-				"lodsb\n\t" //leggo secondo valore ph
-				"lodsb\n\t" //leggo terzo valore ph
+				"movb $44,%%al\n\t" //metto ,
+				"stosb\n\t"
+				"movb $45, %%al\n\t" //metto - nelle valvole
+				"stosb\n\t"
+				"stosb\n\t"
+				"inc %%rsi\n\t" //leggo secondo valore ph
+				"inc %%rsi\n\t" //leggo terzo valore ph
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
