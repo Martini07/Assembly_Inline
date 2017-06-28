@@ -359,7 +359,6 @@ void inlineasm(char *o, char *i) {
                 "stosb\n\t"
                 "movb $83, %%al\n\t" //scrivo S
                 "stosb\n\t"
-                "\n\t"//write NCK PRIMA DI AS PERO
                 "lodsb\n\t" //leggo carriage return
                 "stosb\n\t"    
                     "jmp loop\n\t"
