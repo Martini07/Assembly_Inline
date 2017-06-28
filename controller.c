@@ -171,6 +171,7 @@ void inlineasm(char *o, char *i) {
             "xorb %%cl, %%cl\n\t" //contatore dei cicli di clocl
 			"xorb %%dl, %%dl\n\t" //stato soluzione
 			"loop:\n\t"
+            "movb $10, %%bl\n\t"//divisore
                 "lodsb\n\t" //leggo primo carattere (start)
 				"cmpb $0, %%al\n\t"
 				"je end_loop\n\t"
@@ -207,6 +208,15 @@ void inlineasm(char *o, char *i) {
 				"lodsb\n\t" //leggo carriage return o conviene metterlo diretto e inc rsi?
 				"stosb\n\t"
                 "jmp loop\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK FIXED 00
+        "movb $48, %%al\n\t"
+        "stosb\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
+        "jmp loop\n\t"
 			"al_neutro:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
 				"movb $78,%%al\n\t" //so che è neutro scrivo N
@@ -219,6 +229,18 @@ void inlineasm(char *o, char *i) {
 				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK>0 NEUTRO
+        "mov %%ecx, %%eax\n\t"
+        "divb %%bl\n\t"
+        "addb $48, %%al\n\t"
+        "stosb\n\t"
+        "addb $48, %%ah\n\t"
+        "movb %%ah, %%al\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
                 "jmp loop\n\t"
 			"acid:\n\t"
 				"cmpb $1, %%dl\n\t" //confronto se prima era acido
@@ -235,6 +257,14 @@ void inlineasm(char *o, char *i) {
 				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK FIXED 00
+        "movb $48, %%al\n\t"
+        "stosb\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
                 "jmp loop\n\t"
 			"al_acid:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
@@ -251,6 +281,18 @@ void inlineasm(char *o, char *i) {
 				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK
+        "mov %%ecx, %%eax\n\t"
+        "divb %%bl\n\t"
+        "addb $48, %%al\n\t"
+        "stosb\n\t"
+        "addb $48, %%ah\n\t"
+        "movb %%ah, %%al\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
                 "jmp loop\n\t"
 			"notopen:\n\t"
 				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
@@ -258,6 +300,16 @@ void inlineasm(char *o, char *i) {
 				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK SEMPRE < 5
+        "movb $48, %%al\n\t"
+        "stosb\n\t"
+        "movb %%cl, %%al\n\t"
+        "addb $48, %%al\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
                 "jmp loop\n\t"
 			"basic:\n\t"
 				"cmpb $2, %%dl\n\t" //confronto se prima era basico
@@ -275,6 +327,14 @@ void inlineasm(char *o, char *i) {
 				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK FIXED 00
+        "movb $48, %%al\n\t"
+        "stosb\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
                 "jmp loop\n\t"
 			"al_basic:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
@@ -291,6 +351,18 @@ void inlineasm(char *o, char *i) {
 				"stosb\n\t"
 				"lodsb\n\t" //leggo carriage return
 				"stosb\n\t"
+        "\n\t"
+        "\n\t"//PRINT NCK
+        "mov %%ecx, %%eax\n\t"
+        "divb %%bl\n\t"
+        "addb $48, %%al\n\t"
+        "stosb\n\t"
+        "addb $48, %%ah\n\t"
+        "movb %%ah, %%al\n\t"
+        "stosb\n\t"
+        "movb $44,%%al\n\t"
+        "stosb\n\t"
+        "\n\t"
                 "jmp loop\n\t"
 			"verify_81:\n\t"
 				"lodsb\n\t" //leggo terza cifra
