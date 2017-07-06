@@ -7,7 +7,7 @@
 #include <sys/time.h>
 
 /* Inserite eventuali extern modules qui */
-void inlineasm(char *o, char *i);
+
 /* ************************************* */
 
 enum { MAXLINES = 400 };
@@ -24,7 +24,7 @@ long long current_timestamp() {
 int main(int argc, char *argv[]) {
     int i = 0;
     char bufferin[MAXLINES*8+1] ;
-    char line[1024];
+    char line[1024] ;
     long long tic_c, toc_c, tic_asm, toc_asm;
 
     char bufferout_c[MAXLINES*8+1] = "" ;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
         i = i + 1;
         strcat( bufferin, line) ;
     }
-
+	
     bufferin[MAXLINES*8] = '\0' ;
 
     fclose(inputFile);
@@ -58,22 +58,23 @@ int main(int argc, char *argv[]) {
     /* ELABORAZIONE in C */
     tic_c = current_timestamp();
 
-  	/* supponendo di avere una variabile bufferin = "0,0,001\n0,0,013\n1,0,045\n...\n1,1,067\n\0" contenente i valori letti dal file */
   	int c = 0, j = 0;
   	int init, reset, ph, nck=0 ;
-  	char st = '-', vlv[2] = "--", oldst = '-' ;
-  	char tmpout[8] ;
-  	char nckstr[2] ;
+  	char st = '-', vlv[3] = "--", oldst = '-' ;
+  	char tmpout[9] ;
+  	char nckstr[3] = "--" ;
 
   	i = 0;
+
+
   	while ( bufferin[i] != '\0' ) {
-      init = bufferin[i] - '0' ;
-  		reset = bufferin[i+2] - '0' ;
+		init = bufferin[i] - '0' ;
+		reset = bufferin[i+2] - '0' ;
     	ph = (bufferin[i+4]-'0')*100 + (bufferin[i+5]-'0')*10 + (bufferin[i+6]-'0') ;
 
-      strcpy(tmpout, "-,--,--\n") ;
-
-      /* printf("i=%d, init: %d, reset: %d, ph: %d, tmpout: %s\n", i, init, reset, ph, tmpout) ; */
+		strcpy(tmpout, "-,--,--\n") ;
+      
+		/* printf("i=%d, init: %d, reset: %d, ph: %d, tmpout: %s", i, init, reset, ph, tmpout) ; */
     	if ( init == 0 || reset == 1) {
           oldst = '-' ;
     	}
@@ -98,24 +99,17 @@ int main(int argc, char *argv[]) {
       		{
         		nck = nck + 1 ;
       		}
-      		sprintf(nckstr,"%.2d",nck) ;
-      		/* determino lo stato della valvola */
+      		sprintf(nckstr,"%.2d",nck) ; 
+			/* determino lo stato della valvola */
       		if ( st == 'A' && nck>4 ) {
         		strcpy(vlv,"BS") ;
-            /* vlv[0] = 'B' ;
-            vlv[1] = 'S' ; */
-      		}
+			}
       		else if ( st == 'B' && nck>4 ) {
             strcpy(vlv,"AS") ;
-            /* vlv[0] = 'A' ;
-            vlv[1] = 'S' ; */
-      		}
-      		else
-      		{
+            }
+      		else {
             strcpy(vlv,"--") ;
-            /* vlv[0] = '-' ;
-            vlv[1] = '-' ; */
-      		}
+            }
       		/* aggiorno oldst */
       		oldst = st ;
       		/* genero la stringa di output */
@@ -138,34 +132,14 @@ int main(int argc, char *argv[]) {
 
 
     /* INIZIO ELABORAZIONE ASM */
+
     tic_asm = current_timestamp();
+
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
-	
-    inlineasm(bufferout_asm,bufferin);
-    toc_asm = current_timestamp();
-
-      long long asm_time_in_nanos = toc_asm - tic_asm;
-
-    /* FINE ELABORAZIONE ASM */
-
-
-    printf("C time elapsed: %lld ns\n", c_time_in_nanos);
-    printf("ASM time elapsed: %lld ns\n", asm_time_in_nanos);
-
-    /* Salvataggio dei risultati ASM */
-  	FILE *outputFile;
-    outputFile = fopen (argv[2], "w");
-    fprintf (outputFile, "%s", bufferout_asm);
-    fclose (outputFile);
-
-    return 0;
-}
-
-void inlineasm(char *o, char *i) {
-    asm (
-            "xorb %%cl, %%cl\n\t" //contatore dei cicli di clock
+	__asm__("lea %0, %%rdi\n\t"
+			"xorb %%cl, %%cl\n\t" //contatore dei cicli di clock
 			"xorb %%dl, %%dl\n\t" //stato soluzione
 			"movb $10, %%bl\n\t" //divisore
 			"loop:\n\t"
@@ -394,10 +368,24 @@ void inlineasm(char *o, char *i) {
                 "jmp loop\n\t"
             "end_loop:\n\t"
 		        "movb $0, (%%rdi)\n\t" //insert end string character
-		        "#movq -0x8(%%rbp), %%rdi\n\t" //restore pointer
-            :"=g" (o)
-            :"g" (i)
-    );
-    return;
-}
+			:"=g" (bufferout_asm)
+            :"S" (bufferin)
+			);
+    toc_asm = current_timestamp();
 
+  	long long asm_time_in_nanos = toc_asm - tic_asm;
+
+    /* FINE ELABORAZIONE ASM */
+
+
+    printf("C time elapsed: %lld ns\n", c_time_in_nanos);
+    printf("ASM time elapsed: %lld ns\n", asm_time_in_nanos);
+
+    /* Salvataggio dei risultati ASM */
+  	FILE *outputFile;
+    outputFile = fopen (argv[2], "w");
+    fprintf (outputFile, "%s", bufferout_asm);
+    fclose (outputFile);
+
+    return 0;
+}
