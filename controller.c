@@ -7,7 +7,6 @@
 #include <sys/time.h>
 
 /* Inserite eventuali extern modules qui */
-
 /* ************************************* */
 
 enum { MAXLINES = 400 };
@@ -138,8 +137,8 @@ int main(int argc, char *argv[]) {
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
-	__asm__("lea %0, %%rdi\n\t"
-			"xorb %%cl, %%cl\n\t" //contatore dei cicli di clock
+     __asm__("lea %0, %%rdi\n\t"
+			"xorw %%cx, %%cx\n\t" //contatore dei cicli di clock
 			"xorb %%dl, %%dl\n\t" //stato soluzione
 			"movb $10, %%bl\n\t" //divisore
 			"loop:\n\t"
@@ -154,7 +153,7 @@ int main(int argc, char *argv[]) {
 				"je reset\n\t" //se continua init a 1 e reset a 0
 				"inc %%rsi\n\t"
 				"lodsb\n\t" //leggo prima cifra ph
-				"cmpb $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevedibile
+				"cmpb $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevrdibile
 				"je basic\n\t"
 				"lodsb\n\t" //leggo seconda cifra ph (sapendo che la prima è "0" (!=1))
 				"cmpb $54, %%al\n\t" //confronto col 6 
@@ -188,7 +187,7 @@ int main(int argc, char *argv[]) {
 				"incb %%cl\n\t" //incremento contatore cicli di clock
 				"inc %%rsi\n\t" //leggo terzo valore ph
 				"#\n\t"//PRINT NCK>0 NEUTRO
-                "mov %%ecx, %%eax\n\t"
+                "mov %%cx, %%ax\n\t"
                 "divb %%bl\n\t"
                 "addb $48, %%al\n\t"
                 "stosb\n\t"
@@ -231,7 +230,7 @@ int main(int argc, char *argv[]) {
 				"inc %%rsi\n\t" //leggo terza cifra ph
 				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
 				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
-				"mov %%ecx, %%eax\n\t"
+				"mov %%cx, %%ax\n\t"
                 "divb %%bl\n\t"
                 "addb $48, %%al\n\t"
                 "stosb\n\t"
@@ -290,7 +289,7 @@ int main(int argc, char *argv[]) {
 				"inc %%rsi\n\t" //leggo terza cifra ph
 				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
 				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
-				"mov %%ecx, %%eax\n\t"
+				"mov %%cx, %%ax\n\t"
                 "divb %%bl\n\t"
                 "addb $48, %%al\n\t"
                 "stosb\n\t"
@@ -371,6 +370,7 @@ int main(int argc, char *argv[]) {
 			:"=g" (bufferout_asm)
             :"S" (bufferin)
 			);
+	
     toc_asm = current_timestamp();
 
   	long long asm_time_in_nanos = toc_asm - tic_asm;
@@ -389,3 +389,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+  
