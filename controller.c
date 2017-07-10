@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
-     __asm__("lea %0, %%rdi\n\t"
+     __asm__("leal %0, %%edi\n\t"
 			"xorw %%cx, %%cx\n\t" //contatore dei cicli di clock
 			"xorb %%dl, %%dl\n\t" //stato soluzione
 			"movb $10, %%bl\n\t" //divisore
@@ -145,15 +145,15 @@ int main(int argc, char *argv[]) {
                 "lodsb\n\t" //leggo primo carattere (start)
 				"cmpb $0, %%al\n\t"
 				"je end_loop\n\t"
-                "cmpb $48, %%al\n\t" //codice ascii 0
+                "cmpb $48, %%al\n\t" //codice ascii 0: 48 vedere se conviene decrementare 48
                 "je off\n\t" //se continua init a 1
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"lodsb\n\t" //leggo reset
-				"cmpb $49, %%al\n\t" //codice ascii 1
+				"cmpb $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
 				"je reset\n\t" //se continua init a 1 e reset a 0
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"lodsb\n\t" //leggo prima cifra ph
-				"cmpb $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevrdibile
+				"cmpb $49, %%al\n\t" //attenzione se superiore a 199 comportamento imprevedibile
 				"je basic\n\t"
 				"lodsb\n\t" //leggo seconda cifra ph (sapendo che la prima è "0" (!=1))
 				"cmpb $54, %%al\n\t" //confronto col 6 
@@ -175,17 +175,17 @@ int main(int argc, char *argv[]) {
                 "stosb\n\t"
                 "movb $44,%%al\n\t"
                 "stosb\n\t"
-				"inc %%rsi\n\t" //leggo terzo valore ph
+				"inc %%esi\n\t" //leggo terzo valore ph
 				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola (soluzione già neutra)
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"al_neutro:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
-				"inc %%rsi\n\t" //leggo terzo valore ph
+				"inc %%esi\n\t" //leggo terzo valore ph
 				"#\n\t"//PRINT NCK>0 NEUTRO
                 "mov %%cx, %%ax\n\t"
                 "divb %%bl\n\t"
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola (soluzione già neutra)
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
 				"movb $48, %%al\n\t"
 				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock prima non era acido
 				"movb $1, %%dl\n\t" //imposto stato soluzione attuale acido
-				"inc %%rsi\n\t" //leggo terza cifra ph
+				"inc %%esi\n\t" //leggo terza cifra ph
                 "stosb\n\t"
                 "stosb\n\t"
                 "movb $44,%%al\n\t"
@@ -221,13 +221,13 @@ int main(int argc, char *argv[]) {
 				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"al_acid:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
-				"inc %%rsi\n\t" //leggo terza cifra ph
+				"inc %%esi\n\t" //leggo terza cifra ph
 				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
 				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
 				"mov %%cx, %%ax\n\t"
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"movb $83, %%al\n\t" //scrivo S
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
@@ -267,11 +267,11 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"movb $44,%%al\n\t" //metto ,
 				"stosb\n\t"
-				"je al_basic\n\t"
+				"je al_basic\n\t" //guardare se meglio vedere subito se sono passati i cinque (sei) cicli
 				"#\n\t" //prima non era basico
 				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock
 				"movb $2, %%dl\n\t" //imposto stato soluzione attuale basico
-				"inc %%rsi\n\t" //leggo terza cifra ph
+				"inc %%esi\n\t" //leggo terza cifra ph
 				"movb $48, %%al\n\t"
                 "stosb\n\t"
                 "stosb\n\t"
@@ -280,13 +280,13 @@ int main(int argc, char *argv[]) {
 				"movb $45, %%al\n\t" //scrivo - indico non muovere valvola
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"al_basic:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
-				"inc %%rsi\n\t" //leggo terza cifra ph
+				"inc %%esi\n\t" //leggo terza cifra ph
 				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
 				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
 				"mov %%cx, %%ax\n\t"
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"movb $83, %%al\n\t" //scrivo S
 				"stosb\n\t"
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
@@ -312,33 +312,33 @@ int main(int argc, char *argv[]) {
 				"je neutro2\n\t"
 				"jmp basic2\n\t"
 			"neutro2:\n\t"
-				"dec %%rsi\n\t"
+				"dec %%esi\n\t"
 				"jmp neutro\n\t"
 			"basic2:\n\t"
-				"dec %%rsi\n\t"
+				"dec %%esi\n\t"
 				"jmp basic\n\t"
 			"off:\n\t"
 				"xorb %%cl, %%cl\n\t" //azzero contatore
 				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico stato indifferente ( dispositivo spento)
 				"stosb\n\t" 
-				"inc %%rsi\n\t" //incremento rsi (salto la , )
+				"inc %%esi\n\t" //incremento rsi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
 				"stosb\n\t"
-				"inc %%rsi\n\t" //leggo reset
+				"inc %%esi\n\t" //leggo reset
 				"movb $45, %%al\n\t" //scrivo - indico numero cicli clock indifferente
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t" //incremento rsi (salto la , )
+				"inc %%esi\n\t" //incremento rsi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
                 "stosb\n\t" //scrivo secondo ,
-				"inc %%rsi\n\t" //leggo primo valore ph
+				"inc %%esi\n\t" //leggo primo valore ph
 				"movb $45, %%al\n\t" //sostituisco con - chiudo valvole
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t" //leggo secondo valore ph
-				"inc %%rsi\n\t" //leggo terzo valore ph
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t" //leggo secondo valore ph
+				"inc %%esi\n\t" //leggo terzo valore ph
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
@@ -347,10 +347,10 @@ int main(int argc, char *argv[]) {
 				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico macchina in reset
 				"stosb\n\t"
-				"inc %%rsi\n\t" //incremento rsi (salto la , )
+				"inc %%esi\n\t" //incremento rsi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
                 "stosb\n\t" //scrivo secondo ,
-				"inc %%rsi\n\t" //leggo primo valore ph
+				"inc %%esi\n\t" //leggo primo valore ph
 				"movb $45, %%al\n\t" //sostituisco con -
 				"stosb\n\t"
 				"stosb\n\t"
@@ -359,14 +359,14 @@ int main(int argc, char *argv[]) {
 				"movb $45, %%al\n\t" //metto - nelle valvole
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%rsi\n\t" //leggo secondo valore ph
-				"inc %%rsi\n\t" //leggo terzo valore ph
-				"inc %%rsi\n\t"
+				"inc %%esi\n\t" //leggo secondo valore ph
+				"inc %%esi\n\t" //leggo terzo valore ph
+				"inc %%esi\n\t"
 				"movb $13, %%al\n\t" //scrivo carriage return
 				"stosb\n\t"
                 "jmp loop\n\t"
             "end_loop:\n\t"
-		        "movb $0, (%%rdi)\n\t" //inserisco carattere fine stringa
+		        "movb $0, (%%edi)\n\t" //insert end string character
 			:"=g" (bufferout_asm)
             :"S" (bufferin)
 			);
