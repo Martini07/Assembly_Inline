@@ -145,11 +145,11 @@ int main(int argc, char *argv[]) {
                 "lodsb\n\t" //leggo primo carattere (start)
 				"cmpb $0, %%al\n\t"
 				"je end_loop\n\t"
-                "cmpb $48, %%al\n\t" //codice ascii 0: 48 vedere se conviene decrementare 48
+                "cmpb $48, %%al\n\t" //codice ascii 0
                 "je off\n\t" //se continua init a 1
 				"inc %%rsi\n\t"
 				"lodsb\n\t" //leggo reset
-				"cmpb $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
+				"cmpb $49, %%al\n\t" //codice ascii 1
 				"je reset\n\t" //se continua init a 1 e reset a 0
 				"inc %%rsi\n\t"
 				"lodsb\n\t" //leggo prima cifra ph
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"movb $44,%%al\n\t" //metto ,
 				"stosb\n\t"
-				"je al_basic\n\t" //guardare se meglio vedere subito se sono passati i cinque (sei) cicli
+				"je al_basic\n\t"
 				"#\n\t" //prima non era basico
 				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock
 				"movb $2, %%dl\n\t" //imposto stato soluzione attuale basico
@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
                 "jmp loop\n\t"
             "end_loop:\n\t"
-		        "movb $0, (%%rdi)\n\t" //insert end string character
+		        "movb $0, (%%rdi)\n\t" //inserisco carattere fine stringa
 			:"=g" (bufferout_asm)
             :"S" (bufferin)
 			);
