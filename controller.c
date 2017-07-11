@@ -322,14 +322,14 @@ int main(int argc, char *argv[]) {
 				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico stato indifferente ( dispositivo spento)
 				"stosb\n\t" 
-				"inc %%esi\n\t" //incremento rsi (salto la , )
+				"inc %%esi\n\t" //incremento esi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
 				"stosb\n\t"
 				"inc %%esi\n\t" //leggo reset
 				"movb $45, %%al\n\t" //scrivo - indico numero cicli clock indifferente
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%esi\n\t" //incremento rsi (salto la , )
+				"inc %%esi\n\t" //incremento esi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
                 "stosb\n\t" //scrivo secondo ,
 				"inc %%esi\n\t" //leggo primo valore ph
@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
 				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico macchina in reset
 				"stosb\n\t"
-				"inc %%esi\n\t" //incremento rsi (salto la , )
+				"inc %%esi\n\t" //incremento esi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
                 "stosb\n\t" //scrivo secondo ,
 				"inc %%esi\n\t" //leggo primo valore ph
