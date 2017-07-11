@@ -145,11 +145,11 @@ int main(int argc, char *argv[]) {
                 "lodsb\n\t" //leggo primo carattere (start)
 				"cmpb $0, %%al\n\t"
 				"je end_loop\n\t"
-                "cmpb $48, %%al\n\t" //codice ascii 0: 48 vedere se conviene decrementare 48
+                "cmpb $48, %%al\n\t" //codice ascii 0
                 "je off\n\t" //se continua init a 1
 				"inc %%esi\n\t"
 				"lodsb\n\t" //leggo reset
-				"cmpb $49, %%al\n\t" //codice ascii 1: 49 vedere se conviene decrementare di 49
+				"cmpb $49, %%al\n\t" //codice ascii 1
 				"je reset\n\t" //se continua init a 1 e reset a 0
 				"inc %%esi\n\t"
 				"lodsb\n\t" //leggo prima cifra ph
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"al_neutro:\n\t"
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"acid:\n\t"
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"al_acid:\n\t"
@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
 				"movb $83, %%al\n\t" //scrivo S
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"notopen:\n\t"
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"basic:\n\t"
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"movb $44,%%al\n\t" //metto ,
 				"stosb\n\t"
-				"je al_basic\n\t" //guardare se meglio vedere subito se sono passati i cinque (sei) cicli
+				"je al_basic\n\t"
 				"#\n\t" //prima non era basico
 				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock
 				"movb $2, %%dl\n\t" //imposto stato soluzione attuale basico
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
 				"stosb\n\t"
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"al_basic:\n\t"
@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
 				"movb $83, %%al\n\t" //scrivo S
 				"stosb\n\t"
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"verify_81:\n\t"
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
 				"inc %%esi\n\t" //leggo secondo valore ph
 				"inc %%esi\n\t" //leggo terzo valore ph
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
 			"reset:\n\t"
@@ -362,11 +362,11 @@ int main(int argc, char *argv[]) {
 				"inc %%esi\n\t" //leggo secondo valore ph
 				"inc %%esi\n\t" //leggo terzo valore ph
 				"inc %%esi\n\t"
-				"movb $13, %%al\n\t" //scrivo carriage return
+				"movb $10, %%al\n\t" //scrivo line feed
 				"stosb\n\t"
                 "jmp loop\n\t"
             "end_loop:\n\t"
-		        "movb $0, (%%edi)\n\t" //insert end string character
+		        "stosb\n\t" //copio ultimo carattere letto sicuramente carattere fine stringa
 			:"=g" (bufferout_asm)
             :"S" (bufferin)
 			);
