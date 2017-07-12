@@ -1,4 +1,4 @@
-EXE= controller.o
+EXE= controller
 SRC= controller.c
 FLAGS= -m32
 
