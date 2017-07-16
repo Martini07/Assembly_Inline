@@ -7,6 +7,7 @@
 #include <sys/time.h>
 
 /* Inserite eventuali extern modules qui */
+
 /* ************************************* */
 
 enum { MAXLINES = 400 };
@@ -159,7 +160,7 @@ int main(int argc, char *argv[]) {
 				"cmpb $54, %%al\n\t" //confronto col 6 
 				"jl acid\n\t"
 				"cmpb $56, %%al\n\t" //confonto col 8
-				"jg basic\n\t"
+				"jg basic2\n\t"
 				"je verify_81\n\t"
 				"neutro:\n\t"
 				"cmpb $4, %%dl\n\t" //prima era neutro
@@ -271,6 +272,7 @@ int main(int argc, char *argv[]) {
 				"#\n\t" //prima non era basico
 				"xorb %%cl, %%cl\n\t" //azzero contatore cicli di clock
 				"movb $2, %%dl\n\t" //imposto stato soluzione attuale basico
+				"inc %%esi\n\t" //leggo seconda cifra ph
 				"inc %%esi\n\t" //leggo terza cifra ph
 				"movb $48, %%al\n\t"
                 "stosb\n\t"
@@ -286,6 +288,7 @@ int main(int argc, char *argv[]) {
                 "jmp loop\n\t"
 			"al_basic:\n\t"
 				"incb %%cl\n\t" //incremento contatore cicli di clock
+				"inc %%esi\n\t" //leggo seconda cifra ph
 				"inc %%esi\n\t" //leggo terza cifra ph
 				"cmpb $5, %%cl\n\t" //confronto se sono passati 6 cicli di clock (parto da 0)
 				"jl notopen\n\t" //se continuo sono passati almeno 6 cicli di clock
@@ -310,11 +313,15 @@ int main(int argc, char *argv[]) {
 				"lodsb\n\t" //leggo terza cifra
 				"cmpb $48, %%al\n\t" //confronto con 0
 				"je neutro2\n\t"
-				"jmp basic2\n\t"
+				"jmp basic3\n\t"
 			"neutro2:\n\t"
 				"dec %%esi\n\t"
 				"jmp neutro\n\t"
 			"basic2:\n\t"
+				"dec %%esi\n\t"
+				"jmp basic\n\t"
+			"basic3:\n\t"
+				"dec %%esi\n\t"
 				"dec %%esi\n\t"
 				"jmp basic\n\t"
 			"off:\n\t"
@@ -322,14 +329,14 @@ int main(int argc, char *argv[]) {
 				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico stato indifferente ( dispositivo spento)
 				"stosb\n\t" 
-				"inc %%esi\n\t" //incremento esi (salto la , )
+				"inc %%esi\n\t" //incremento rsi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
 				"stosb\n\t"
 				"inc %%esi\n\t" //leggo reset
 				"movb $45, %%al\n\t" //scrivo - indico numero cicli clock indifferente
 				"stosb\n\t"
 				"stosb\n\t"
-				"inc %%esi\n\t" //incremento esi (salto la , )
+				"inc %%esi\n\t" //incremento rsi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
                 "stosb\n\t" //scrivo secondo ,
 				"inc %%esi\n\t" //leggo primo valore ph
@@ -347,7 +354,7 @@ int main(int argc, char *argv[]) {
 				"xorb %%dl, %%dl\n\t" //azzero stato
 				"movb $45, %%al\n\t" //scrivo - indico macchina in reset
 				"stosb\n\t"
-				"inc %%esi\n\t" //incremento esi (salto la , )
+				"inc %%esi\n\t" //incremento rsi (salto la , )
 				"movb $44, %%al\n\t" //scrivo la ,
                 "stosb\n\t" //scrivo secondo ,
 				"inc %%esi\n\t" //leggo primo valore ph
@@ -389,4 +396,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-  
